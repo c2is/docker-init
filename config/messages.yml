@@ -1,0 +1,9 @@
+error:
+  exists: "Some config files already exists. Aborting."
+  required_files: "Some required files missing (Check if you have those files: docker/parameters.dist, docker/docker-compose.yml.dist)"
+  config_resolver:
+    not_found: "The specified file is not found : %s"
+
+console:
+  exists: "The console file already exists"
+  success: "The console file successfully generated"

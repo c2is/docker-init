@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ "$(uname)" != "Linux" ]; then
+    path=`readlink "$0"`
+else
+    path=`readlink -f "$0"`
+fi
+
+absolute_path=$(dirname "$path")
+library_path="$absolute_path/lib"
+config_path="$absolute_path/config"
+current_path=`pwd`
+dist_path="$current_path/docker/dist"
+
+if [ ! -d $absolute_path/log ]; then
+    mkdir $absolute_path/log
+fi
+
+log_file=$absolute_path/log/$(date +%Y%m%d).log
+
+find $absolute_path/log/* -mtime +1 -type f -delete
+
+. "$library_path/vars.sh"
+. "$library_path/functions.sh"
+. "$library_path/init.sh"
+
+init $1
+
+exit;
