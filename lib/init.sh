@@ -8,7 +8,7 @@ eval $(parse_yaml "$config_path/messages.yml" "messages_")
 # $1: optional action [reset, purge]
 init () {
     if [ ! -z $1 ]; then
-        optional $1
+        optional $@
     fi
 
     if [ -f $current_path/docker/parameters ] || [ -f $current_path/docker/docker-compose.yml ]; then
@@ -55,14 +55,70 @@ function purge()
 # Generate console file
 function console()
 {
-    if [ ! -f $current_path/docker/console ]; then
+    force=false
+    project="/var/www/symfony/app/console"
+    container="php"
 
+    if ! options=$(getopt -o f: -l force, project: -- "$@")
+    then
+        report "error" "$message_error_unexpected"
+        exit 1
+    fi
+
+    accepted=("--force" "--project" "--container")
+
+    while [ $# -gt 0 ]
+    do
+        case $1 in
+        -f|--force)
+            force=true
+            ;;
+        --project)
+            if [[ -z $2 ]] || [[ ${accepted[*]} =~ "$2" ]]; then
+                report "error" "$messages_console_error_directory"
+                exit 1;
+            fi
+
+            project="$2";
+            shift
+            ;;
+        --container)
+            if [[ -z $2 ]] || [[ ${accepted[*]} =~ "$2" ]]; then
+                report "error" "$messages_console_error_container"
+                exit 1;
+            fi
+
+            container="$2";
+            shift
+            ;;
+        --)
+            shift;
+            break
+            ;;
+        -*)
+            message=`printf "$messages_console_error_options" "$0" "$1"`
+            report "error" "$message";
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+        esac
+        shift
+    done
+
+    if [ -f $current_path/docker/console ] && [ force ]; then
+        rm -rf $current_path/docker/console
+    fi
+
+    if [ ! -f $current_path/docker/console ]; then
+    echo $current_path
 cat <<EOF >> $current_path/docker/console
     #! /bin/bash
-    echo -e "Running command: docker-compose run php /var/www/symfony/app/console $@"
+    echo -e "Running command: docker-compose run $container $project \$@"
     echo -e "...............\n\n"
 
-    eval "docker-compose run php /var/www/symfony/app/console $@"
+    eval "docker-compose run $container $project \$@"
 EOF
 
         chmod +x $current_path/docker/console
@@ -85,8 +141,8 @@ function optional()
         rm -Rf $current_path/docker/docker-compose.yml
         rm -Rf $current_path/docker/parameters
         ;;
-    'generate_console' )
-        console
+    'generate-console' )
+        console ${@:2}
         exit 0;
     esac
 }

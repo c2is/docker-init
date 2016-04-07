@@ -1,4 +1,5 @@
 error:
+  unexpected: "An unexpected error has occured"
   exists: "Some config files already exists. Aborting."
   required_files: "Some required files missing (Check if you have those files: docker/parameters.dist, docker/docker-compose.yml.dist)"
   config_resolver:
@@ -7,3 +8,9 @@ error:
 console:
   exists: "The console file already exists"
   success: "The console file successfully generated"
+
+console:
+  error:
+    options: "%s: error - unrecognized option %s"
+    directory: "Directory is not specified"
+    container: "Container is not specified"
