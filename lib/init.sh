@@ -7,16 +7,18 @@ eval $(parse_yaml "$config_path/messages.yml" "messages_")
 # Initiate
 # $1: optional action [reset, purge]
 init () {
+    docker_compose_path=$current_path/docker-compose.yml
+
     if [ ! -z $1 ]; then
         optional $@
     fi
 
-    if [ -f $current_path/docker/parameters ] || [ -f $current_path/docker/docker-compose.yml ]; then
+    if [ -f "$current_path/docker/parameters" ] || [ -f "$docker_compose_path" ]; then
         report "error" "$messages_error_exists";
         exit 1;
     fi
 
-    if [ ! -f $dist_path/parameters.dist ] && [ ! -f $dist_path/docker-compose.yml.dist ]; then
+    if [ ! -f "$dist_path/parameters.dist" ] && [ ! -f "$dist_path/dist/docker-compose.yml.dist" ]; then
         report "error" "$messages_error_required_files";
         exit 1;
     fi
@@ -25,8 +27,8 @@ init () {
         parse_config "$dist_path/parameters.dist" "$current_path/docker/parameters"
     fi
 
-    if [ ! -f "$current_path/docker/docker-compose.yml" ]; then
-        replace_config "$current_path/docker/parameters" "$dist_path/docker-compose.yml.dist" "$current_path/docker/docker-compose.yml"
+    if [ ! -f "$docker_compose_path" ]; then
+        replace_config "$current_path/docker/parameters" "$dist_path/docker-compose.yml.dist" "$docker_compose_path"
     fi
 
     config_resolver "$current_path/docker/parameters"
@@ -53,10 +55,11 @@ function purge()
 }
 
 # Generate console file
+# Default target is the symfony 3.0 console file
 function console()
 {
     force=false
-    project="/var/www/symfony/app/console"
+    project="/var/www/symfony/bin/console"
     container="php"
 
     if ! options=$(getopt -o f: -l force, project: -- "$@")
@@ -112,7 +115,7 @@ function console()
     fi
 
     if [ ! -f $current_path/docker/console ]; then
-    echo $current_path
+
 cat <<EOF >> $current_path/docker/console
     #! /bin/bash
     echo -e "Running command: docker-compose run $container $project \$@"
@@ -138,7 +141,7 @@ function optional()
         purge
         ;;
     'reset' )
-        rm -Rf $current_path/docker/docker-compose.yml
+        rm -Rf $current_path/docker-compose.yml
         rm -Rf $current_path/docker/parameters
         ;;
     'generate-console' )

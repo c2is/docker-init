@@ -68,6 +68,8 @@ function parse_config()
             fi
         done > "$2"
     fi
+
+    echo "root_folder=$current_path" >> $2
 }
 
 # Replace value from configuration
@@ -95,7 +97,7 @@ function replace_config()
             search="{{${param}}}"
             replace=${values[$i]}
 
-            sed -e "s/${search}/${replace}/g" $3 > "$current_path/_${3##*/}"
+            sed "s|${search}|${replace}|g" $3 > "$current_path/_${3##*/}"
             mv "$current_path/_${3##*/}" $3
         done
     fi
