@@ -16,6 +16,10 @@ console:
     options: "%s: error - unrecognized option %s"
     directory: "Directory is not specified"
     container: "Container is not specified"
+    user: "User is not specified"
+
+config_resolver:
+  file: "File %s generated"
 
 composer:
   exists: "The composer file already exists"
@@ -24,6 +28,7 @@ composer:
     options: "%s: error - unrecognized option %s"
     working_dir: "Working directory not specified"
     container: "Container is not specified"
+    user: "User is not specified"
 
 tasks:
   parse_config: "[dockerinit] Parse configuration - Generate parameters file"

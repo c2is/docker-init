@@ -147,6 +147,10 @@ function config_resolver()
                     sed -e "s|${search}|${replace}|g" $filename > "$current_path/_${filename##*/}"
                     mv "$current_path/_${filename##*/}" $filename
                 done
+
+                message=`printf "$messages_config_resolver_file" "$filename"`
+
+                report "screen" "$message";
             done
         fi
     fi
