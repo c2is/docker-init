@@ -1,0 +1,13 @@
+#dockerinit completion
+_dockerinit ()
+{
+  local cur keywords
+  COMPREPLY=()
+  cur=${COMP_WORDS[COMP_CWORD]}
+  keywords=generate-console reset purge"
+  COMPREPLY=( $(compgen -W "$keywords" -- $cur ) )
+
+  return 0
+}
+
+complete -F _dockerinit dockerinit

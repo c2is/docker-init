@@ -5,12 +5,32 @@ error:
   config_resolver:
     not_found: "The specified file is not found : %s"
 
-console:
-  exists: "The console file already exists"
-  success: "The console file successfully generated"
+init:
+  error:
+    exists: "Some config files already exists. Aborting. [found:%s]"
 
 console:
+  exists: "The console file already exists"
+  success: "The console file is successfully generated"
   error:
     options: "%s: error - unrecognized option %s"
     directory: "Directory is not specified"
     container: "Container is not specified"
+
+composer:
+  exists: "The composer file already exists"
+  success: "The composer file is successfully generated"
+  error:
+    options: "%s: error - unrecognized option %s"
+    working_dir: "Working directory not specified"
+    container: "Container is not specified"
+
+tasks:
+  parse_config: "[dockerinit] Parse configuration - Generate parameters file"
+  config_resolver: "[dockerinit] Config resolver process"
+  replace_config: "[dockerinit] Replace configuration"
+  done: "[dockerinit] done"
+
+get_config:
+  error:
+    parameter: "Paramters file not found. Please run 'dockerinit' to generate it"

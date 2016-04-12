@@ -1,0 +1,7 @@
+Package: dockerinit
+Version: 1.0
+Section: base
+Priority: optional
+Architecture: all
+Maintainer: HAFFAF Abdelhak <abdelhak.haffaf@gmail.com>
+Description: Docker init tool

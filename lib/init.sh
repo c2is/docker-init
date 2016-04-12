@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . "$library_path/yaml_parser.sh"
+. "$library_path/wrapper.sh"
 
 eval $(parse_yaml "$config_path/messages.yml" "messages_")
 
@@ -14,7 +15,18 @@ init () {
     fi
 
     if [ -f "$current_path/docker/parameters" ] || [ -f "$docker_compose_path" ]; then
-        report "error" "$messages_error_exists";
+        files=""
+
+        if [ -f "$current_path/docker/parameters" ]; then
+            files+=" $current_path/docker/parameters"
+        fi
+
+        if [ -f "$docker_compose_path" ]; then
+            files+=" $docker_compose_path"
+        fi
+
+        message=`printf "$messages_init_error_exists" "$files"`
+        report "error" "$message";
         exit 1;
     fi
 
@@ -33,7 +45,7 @@ init () {
 
     config_resolver "$current_path/docker/parameters"
 
-    echo "end";
+    report "info" "$messages_tasks_done";
     exit 0;
 }
 
@@ -54,80 +66,33 @@ function purge()
     fi
 }
 
-# Generate console file
-# Default target is the symfony 3.0 console file
-function console()
+# Reset
+# Call with the reset option
+# Remove dist generated files
+function reset()
 {
-    force=false
-    project="/var/www/symfony/bin/console"
-    container="php"
-
-    if ! options=$(getopt -o f: -l force, project: -- "$@")
-    then
-        report "error" "$message_error_unexpected"
-        exit 1
+    if [ -f $current_path/docker-compose.yml ]; then
+        rm -Rf $current_path/docker-compose.yml
     fi
 
-    accepted=("--force" "--project" "--container")
+    if [ -f $current_path/docker/parameters ]; then
+        rm -Rf $current_path/docker/parameters
+    fi
+}
 
-    while [ $# -gt 0 ]
-    do
-        case $1 in
-        -f|--force)
-            force=true
-            ;;
-        --project)
-            if [[ -z $2 ]] || [[ ${accepted[*]} =~ "$2" ]]; then
-                report "error" "$messages_console_error_directory"
-                exit 1;
-            fi
+# Clear
+# Call with the clear option
+# Remove generate console and composer files
+function clear()
+{
+    reset
 
-            project="$2";
-            shift
-            ;;
-        --container)
-            if [[ -z $2 ]] || [[ ${accepted[*]} =~ "$2" ]]; then
-                report "error" "$messages_console_error_container"
-                exit 1;
-            fi
-
-            container="$2";
-            shift
-            ;;
-        --)
-            shift;
-            break
-            ;;
-        -*)
-            message=`printf "$messages_console_error_options" "$0" "$1"`
-            report "error" "$message";
-            exit 1
-            ;;
-        *)
-            break
-            ;;
-        esac
-        shift
-    done
-
-    if [ -f $current_path/docker/console ] && [ force ]; then
-        rm -rf $current_path/docker/console
+    if [ -f $current_path/docker/console ]; then
+        rm -Rf $current_path/docker/console
     fi
 
-    if [ ! -f $current_path/docker/console ]; then
-
-cat <<EOF >> $current_path/docker/console
-    #! /bin/bash
-    echo -e "Running command: docker-compose run $container $project \$@"
-    echo -e "...............\n\n"
-
-    eval "docker-compose run $container $project \$@"
-EOF
-
-        chmod +x $current_path/docker/console
-        report "success" "$messages_console_success";
-    else
-        report "warning" "$messages_console_exists";
+    if [ -f $current_path/docker/composer ]; then
+        rm -Rf $current_path/docker/composer
     fi
 }
 
@@ -141,11 +106,23 @@ function optional()
         purge
         ;;
     'reset' )
-        rm -Rf $current_path/docker-compose.yml
-        rm -Rf $current_path/docker/parameters
+        reset
+        ;;
+    'clear' )
+        clear
+        exit 0;
         ;;
     'generate-console' )
         console ${@:2}
-        exit 0;
+        exit 0
+        ;;
+    'generate-composer' )
+        composer ${@:2}
+        exit 0
+        ;;
+    'get_config' )
+        get_config ${@:2}
+        exit 0
+        ;;
     esac
 }

@@ -18,7 +18,7 @@ function report {
 	        echo -e $screen_log;
 	        ;;
 	    "info" )
-	        echo -e "$screen_log";
+	        echo -e $cyan"$screen_log"$white;
 	        ;;
 	   	"success" )
 	        echo -e $green"$screen_log"$white;
@@ -43,6 +43,8 @@ function report {
 # $2: string the output file
 function parse_config()
 {
+    report "info" "$messages_tasks_parse_config"
+
     i=0
 
     while IFS='' read -r line || [[ -n "$line" ]]; do
@@ -69,7 +71,7 @@ function parse_config()
         done > "$2"
     fi
 
-    echo "root_folder=$current_path" >> $2
+    echo "root_dir=$current_path" >> $2
 }
 
 # Replace value from configuration
@@ -77,6 +79,8 @@ function parse_config()
 # $2: string the source file
 function replace_config()
 {
+    report "info" "$messages_tasks_replace_config"
+
     i=0
 
     while IFS='' read -r line || [[ -n "$line" ]]; do
@@ -107,6 +111,8 @@ function replace_config()
 # $1: source parameters file
 function config_resolver()
 {
+    report "info" "$messages_tasks_config_resolver";
+
     if [ -f "$current_path/docker/config_resolver" ]; then
         i=0
 
@@ -131,12 +137,6 @@ function config_resolver()
             for file in "${files[@]}"; do
                 filename=${file%.dist}
 
-                if [ ! -f $filename ]; then
-                    message=`printf "$messages_error_config_resolver_not_found" "$filename"`
-                    report "error" "$message"
-                    continue
-                fi
-
                 `cp ${file} ${filename}`
 
                 for i in "${!params[@]}"; do
@@ -144,10 +144,40 @@ function config_resolver()
                     search="{{${param}}}"
                     replace=${values[$i]}
 
-                    sed -e "s/${search}/${replace}/g" $filename > "$current_path/_${filename##*/}"
+                    sed -e "s|${search}|${replace}|g" $filename > "$current_path/_${filename##*/}"
                     mv "$current_path/_${filename##*/}" $filename
                 done
             done
         fi
     fi
+}
+
+# Get config
+# $1: parameter name
+# $2: default value
+function get_config()
+{
+    if [ ! -f "$current_path/docker/parameters" ]; then
+        report "error" "$messages_get_config_error_parameters"
+        exit 1
+    fi
+
+    while IFS='' read -r line || [[ -n "$line" ]]; do
+        if [ ! -z "$line" ] && [[ ${line:0:1} != "#" ]]; then
+            param=${line%=*}
+            value=${line/*=}
+
+            if [ "$1" == "$param" ]; then
+                echo $value
+                exit 0
+            fi
+        fi
+    done < "$current_path/docker/parameters"
+
+    if [[ $2 ]]; then
+        echo $2
+        exit 0
+    fi
+
+    exit 1
 }
