@@ -135,20 +135,26 @@ function config_resolver()
 
         if [ ! -z params ] && [ ! -z values ]; then
             for file in "${files[@]}"; do
-                filename=${file%.dist}
+                if [[ $file =~ ">" ]]; then
+                    source=${file%\>*}
+                    destination=${file/*\>}
+                else
+                    source=${file}
+                    destination=${file%.dist}
+                fi
 
-                `cp ${file} ${filename}`
+                `cp ${source} ${destination}`
 
                 for i in "${!params[@]}"; do
                     param=${params[$i]}
                     search="{{${param}}}"
                     replace=${values[$i]}
 
-                    sed -e "s|${search}|${replace}|g" $filename > "$current_path/_${filename##*/}"
-                    mv "$current_path/_${filename##*/}" $filename
+                    sed -e "s|${search}|${replace}|g" $destination > "$current_path/_${filename##*/}"
+                    mv "$current_path/_${filename##*/}" $destination
                 done
 
-                message=`printf "$messages_config_resolver_file" "$filename"`
+                message=`printf "$messages_config_resolver_file" "$destination"`
 
                 report "screen" "$message";
             done

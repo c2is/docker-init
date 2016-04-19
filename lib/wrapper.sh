@@ -71,11 +71,11 @@ function console()
     if [ ! -f $current_path/docker/console ]; then
 
 cat <<EOF >> $current_path/docker/console
-    #! /bin/bash
-    echo -e "Running command: docker-compose run --user=$user $container $file \$@"
-    echo -e "...............\n\n"
+#! /bin/bash
+echo -e "Running command: docker-compose run --user=$user $container $file \$@"
+echo -e "...............\n\n"
 
-    eval "docker-compose run --user=$user $container $file \$@"
+eval "docker-compose run --user=$user $container $file \$@"
 EOF
 
         chmod +x $current_path/docker/console
@@ -157,11 +157,11 @@ function composer()
     if [ ! -f $current_path/docker/composer ]; then
 
 cat <<EOF >> $current_path/docker/composer
-    #!/bin/bash
-    echo -e "Running command: docker-compose run --user=$user $container composer \$@ --working-dir=$working_dir"
-    echo -e "...............\n\n"
+#!/bin/bash
+echo -e "Running command: docker-compose run --user=$user $container composer \$@ --working-dir=$working_dir"
+echo -e "...............\n\n"
 
-    docker-compose run --user=$user $container composer \$@ --working-dir=$working_dir
+docker-compose run --user=$user $container composer \$@ --working-dir=$working_dir
 EOF
 
         chmod +x $current_path/docker/composer
