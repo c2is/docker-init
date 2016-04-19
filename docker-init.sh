@@ -18,7 +18,11 @@ fi
 
 log_file=$absolute_path/log/$(date +%Y%m%d).log
 
-rm -rf `find $absolute_path/log/* -mmin +720 -type f`
+count=`ls $absolute_path/log/ | wc -l`
+
+if [ $count -ne 0 ]; then
+    rm -rf `find $absolute_path/log/* -mmin +720 -type f`
+fi
 
 . "$library_path/vars.sh"
 . "$library_path/functions.sh"
