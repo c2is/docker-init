@@ -72,10 +72,10 @@ function console()
 
 cat <<EOF >> $current_path/docker/console
 #! /bin/bash
-echo -e "Running command: docker-compose run --user=$user $container $file \$@"
+echo -e "Running command: docker-compose run --user=$user $container php $file \$@"
 echo -e "...............\n\n"
 
-eval "docker-compose run --user=$user $container $file \$@"
+eval "docker-compose run --user=$user $container php $file \$@"
 EOF
 
         chmod +x $current_path/docker/console
