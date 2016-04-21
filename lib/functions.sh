@@ -20,6 +20,9 @@ function report {
 	    "info" )
 	        echo -e $cyan"$screen_log"$white;
 	        ;;
+	    "debug" )
+	        echo -e $purple"[debug] $screen_log"$white;
+	        ;;
 	   	"success" )
 	        echo -e $green"$screen_log"$white;
 	        ;;
@@ -61,14 +64,23 @@ function parse_config()
             param=${params[$i]}
             value=${values[$i]}
 
-            read -p "$param ($value): " input
+            if [ $3 == true ]; then
+                read -p "$param ($value): " input
 
-            if [ ! -z $input ]; then
-                echo "$param=$input"
+                if [ ! -z $input ]; then
+                    echo "$param=$input"
+                else
+                    echo "$param=$value"
+                fi
             else
                 echo "$param=$value"
             fi
         done > "$2"
+    fi
+
+    if [ $3 == false ]; then
+        message=`printf "$messages_parse_config_no_interaction" "$2"`
+        report "warning" "$message"
     fi
 
     echo "root_dir=$current_path" >> $2
@@ -190,4 +202,10 @@ function get_config()
     fi
 
     exit 1
+}
+
+# Help
+function help()
+{
+    less "$doc_path/dockerinit.help"
 }

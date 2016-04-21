@@ -9,6 +9,7 @@ fi
 absolute_path=$(dirname "$path")
 library_path="$absolute_path/lib"
 config_path="$absolute_path/config"
+doc_path="$absolute_path/doc"
 current_path=`pwd`
 dist_path="$current_path/docker/dist"
 

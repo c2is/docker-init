@@ -5,6 +5,11 @@ error:
   config_resolver:
     not_found: "The specified file is not found : %s"
 
+instantiate:
+  docker_compose: "[dockerinit] Create new file docker/dist/docker-compose.yml.dist"
+  docker_compose_help: "Edit this to define containers for your application"
+  parameters: "[dockerinit] Create new file docker/dist/parameters.dist"
+  parameters_help: "Edit this file to define dockerinit parameters"
 init:
   error:
     exists: "Some config files already exists. Aborting. [found:%s]"
@@ -20,6 +25,9 @@ console:
 
 config_resolver:
   file: "File %s generated"
+
+parse_config:
+  no_interaction: "[dockerinit] No interaction option: %s file was generated with success"
 
 composer:
   exists: "The composer file already exists"

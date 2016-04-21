@@ -1,0 +1,20 @@
+dockerinit
+
+Actions
+
+    help                        Display help file
+    initiate                    Initiate an dockerinit project. Create docker folder with docker-compose.yml.dist and parameters.dist exemples files
+    reset                       Remove docker-compose.yml and parameters files
+        -n, --no-interactive
+    resolver                    Generate files based on config resolver file
+    clear                       Remove docker-compose.yml, parameters, console and composer files
+    generate-console            Generate console wrapper
+        -f, --force
+        --user
+        --container
+        --file
+    generate-composer           Generate composer wrapper
+        -f, --force
+        --user
+        --container
+        --working_dir

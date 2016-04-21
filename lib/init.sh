@@ -35,18 +35,65 @@ init () {
         exit 1;
     fi
 
+    process ${@:2}
+
+    exit 1
+}
+
+# Process function
+function process()
+{
+    interaction=true
+
+    if ! options=$(getopt -o n: -l no-interaction: -- "$@")
+    then
+        report "error" "$message_error_unexpected"
+        exit 1
+    fi
+
+    accepted=("--no-interaction" "-n")
+
+    while [ $# -gt 0 ]
+    do
+        case $1 in
+        -n|--no-interaction )
+            interaction=false
+            ;;
+        --)
+            shift;
+            break
+            ;;
+        -*)
+            message=`printf "$messages_console_error_options" "$0" "$1"`
+            report "error" "$message";
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+        esac
+        shift
+    done
+
     if [ ! -f "$current_path/docker/parameters" ]; then
-        parse_config "$dist_path/parameters.dist" "$current_path/docker/parameters"
+        parse_config "$dist_path/parameters.dist" "$current_path/docker/parameters" $interaction
     fi
 
     if [ ! -f "$docker_compose_path" ]; then
         replace_config "$current_path/docker/parameters" "$dist_path/docker-compose.yml.dist" "$docker_compose_path"
     fi
 
-    config_resolver "$current_path/docker/parameters"
+    resolver
 
     report "info" "$messages_tasks_done";
     exit 0;
+
+}
+
+# Config resolver
+function resolver()
+{
+    config_resolver "$current_path/docker/parameters"
 }
 
 # Clean up
@@ -96,21 +143,100 @@ function clear()
     fi
 }
 
+# Instantiate
+# Call to create default file for docker
+function instantiate()
+{
+    if [ ! -d "$current_path/docker" ]; then
+        mkdir "$current_path/docker"
+    fi
+
+    if [ ! -d "$current_path/docker/dist" ]; then
+        mkdir "$current_path/docker/dist"
+    fi
+
+    if [ ! -f "$current_path/docker/dist/docker-compose.yml.dist" ]; then
+        cat <<EOF >> $current_path/docker/dist/docker-compose.yml.dist
+application:
+    image: c2is/application
+    environment:
+        - SYMFONY_ENV=dev
+    volumes:
+        - {{root_dir}}:/var/www/symfony
+    tty: true
+
+php:
+    build: c2is/php-fpm:symfony-composer
+    ports:
+        - {{port.php-fpm}}:9000
+    environment:
+        - SYMFONY_ENV=dev
+    volumes_from:
+        - application
+
+apache:
+    build: c2is/apache
+    ports:
+        - {{port.apache}}:80
+    environment:
+        - SYMFONY_ENV=dev
+    links:
+        - php:php
+    volumes_from:
+        - application
+    volumes:
+        - ./docker/logs/apache/:/var/log/apache2
+EOF
+        report "info" "$messages_instantiate_docker_compose"
+        report "screen" "$messages_instantiate_docker_compose_help"
+    fi
+
+    if [ ! -f "$current_path/docker/dist/parameters.dist" ]; then
+        cat <<EOF >> $current_path/docker/dist/parameters.dist
+# ports
+port.php-fpm=9000
+port.apache=81
+
+# database
+database.password=96418dc7ed75
+database.name=symfony
+database.username=root
+
+# docker
+docker.ip=192.168.99.100
+EOF
+        report "info" "$messages_instantiate_parameters"
+        report "screen" "$$messages_instantiate_parameters_help"
+    fi
+}
+
 # Optional
 # Execute optional actions
 # $1: optional action
 function optional()
 {
     case "$1" in
+    'help' )
+        help
+        exit 0;
+        ;;
+    'initiate' )
+        instantiate
+        exit 0
+        ;;
     'purge' )
         purge
         ;;
     'reset' )
         reset
         ;;
+    'resolver' )
+        resolver
+        exit 0
+        ;;
     'clear' )
         clear
-        exit 0;
+        exit 0
         ;;
     'generate-console' )
         console ${@:2}
