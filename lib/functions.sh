@@ -67,7 +67,7 @@ function parse_config()
             if [ $3 == true ]; then
                 read -p "$param ($value): " input
 
-                if [ ! -z $input ]; then
+                if [ ! -z "$input" ]; then
                     echo "$param=$input"
                 else
                     echo "$param=$value"
