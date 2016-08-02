@@ -18,7 +18,7 @@ After changing your docker configuration, restart the docker service
 
 Install docker-init in your current directory:
 
-    git clone git@github.com:haflit21/docker-init.git
+    git clone git@github.com:c2is/docker-init.git
     sudo ln -s $(pwd)/docker-init/docker-init.sh /usr/local/bin/dockerinit
 
 ## Project configuration
