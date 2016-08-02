@@ -35,7 +35,11 @@ init () {
         exit 1;
     fi
 
-    process ${@:2}
+    if [ $1 == "purge" ] || [ $1 == "reset" ]; then
+        process ${@:2}
+    else
+        process ${@}
+    fi
 
     exit 1
 }
@@ -45,7 +49,7 @@ function process()
 {
     interaction=true
 
-    if ! options=$(getopt -o n: -l no-interaction: -- "$@")
+    if ! options=$(getopt -o n -l no-interaction -- "$@")
     then
         report "error" "$message_error_unexpected"
         exit 1
@@ -216,7 +220,7 @@ EOF
 function optional()
 {
     case "$1" in
-    'help' )
+    '--help' )
         help
         exit 0;
         ;;

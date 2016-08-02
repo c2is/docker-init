@@ -1,8 +1,12 @@
 dockerinit
 
+Arguments
+
+    --help                      Display help file
+    -n, --no-interactive
+
 Actions
 
-    help                        Display help file
     initiate                    Initiate an dockerinit project. Create docker folder with docker-compose.yml.dist and parameters.dist exemples files
     reset                       Remove docker-compose.yml and parameters files
         -n, --no-interactive
@@ -10,11 +14,11 @@ Actions
     clear                       Remove docker-compose.yml, parameters, console and composer files
     generate-console            Generate console wrapper
         -f, --force
-        --user
-        --container
-        --file
+        --user                  User the console should be ran into (default www-data)
+        --container             Container the console should be ran into (default php)
+        --file                  Path to the Symfony console in the docker container (default /var/www/symfony/bin/console)
     generate-composer           Generate composer wrapper
         -f, --force
-        --user
-        --container
-        --working_dir
+        --user                  User the composer command should be ran into (default www-data)
+        --container             Container the composer command should be ran into (default php)
+        --working_dir           Path to the project in the docker container (default /var/www/symfony)
