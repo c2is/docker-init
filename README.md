@@ -14,6 +14,62 @@ After changing your docker configuration, restart the docker service
 
     sudo service docker restart
 
+## Install
+
+Install docker-init in your current directory:
+
+    git clone git@github.com:haflit21/docker-init.git
+    sudo ln -s $(pwd)/docker-init/docker-init.sh /usr/local/bin/dockerinit
+
+## Project configuration
+
+Docker-init expects this directoy structure:
+
+    /your-project-root
+    --/docker
+    ----config_resolver (optionnal)
+    ----/dist
+    ------docker-compose.yml.dist
+    ------parameters.dist
+
+### parameters.dist
+
+Used to define parameters that will be made available to the docker-compose.yml file and any other file you might need to inject parameters into.
+Parameters are defined as key value pairs separated by an equal sign. You can comment lines with #.
+
+    # Apache configuration
+    apache.port=81
+    apache.host=my-hostname
+
+The values defined in this file will be used as default when running dockerinit and can be overriden.
+A special parameter named root_dir is implicitely added with a value equal to the directory where the dockerinit command is ran.
+
+### config_resolver (optionnal)
+
+Used to add files to be parsed by the dockerinit command to search and replace parameter values.
+Default behaviour expects to be suffixed with .dist, when parsing the file the command will create a new file without the .dist suffix with the replaced parameter values.
+You can override that behaviour and specify a source and destination name for your files with the > operator.
+
+    docker/config/apache/vhost.conf.dist>docker/containers/apache/vhost.conf
+    docker/config/php5/php.ini.dist
+
+### docker-compose.yml.dist
+
+This file is parsed by the command and a docker-compose.yml file is created with the parameter values replaced in the current directory.
+
+## Usage
+
+In your project root directory, use `dockerinit`
+
+This command will ask for parameter values and create the docker-compose.yml file.
+A parameters file will be created with the user values in the docker/ directory.
+
+Use `dockerinit --help` to have more information about the command.
+
+## Run Docker Compose
+
+    docker-compose up -d --build
+
 ## Custom host
 
 In most project a custom hostname will be used in a virtual host in the Apache / nginx configuration.
@@ -24,36 +80,27 @@ To get your Docker IP:
     ifconfig docker0
 
 In your /etc/hosts file add:
+
     <docker-ip> my-host-name
 
-## Install
+## generate-console
 
-Install docker-init in your current directory:
+Used to create a wrapper for the Symfony console. Shown below are the available arguments and their default values.
 
-    git clone git@github.com:haflit21/docker-init.git
-    sudo ln -s $(pwd)/docker-init/docker-init.sh /usr/local/bin/dockerinit
+    dockerinit generate-console --file=/var/www/symfony/bin/console --user=www-data --container=php 
 
-## Usage
+## generate-composer
 
-In your project root directory, use:
+Used to create a wrapper for composer. Shown below are the available arguments and their default values.
 
-    dockerinit
+    dockerinit generate-composer --user=www-data --working_dir=/var/www/symfony --container=php 
 
-This command will ask for your input to setup the project's docker-compose.yml.
+## Symfony usage
 
-## Run Docker Compose
+Run Symfony cli with `./docker/console` eg:
 
-    docker-compose up -d --build
+    ./docker/console cache:clear --env=prod --no-debug
 
-## Setup Symfony
+Run composer cli with `./docker/composer` eg:
 
-    dockerinit generate-console --file /var/www/symfony/app/console
-    dockerinit generate-composer
-
-## Usage
-
-Run Symfony cli with:
-    ./docker/console
-
-Run composer cli with:
     ./docker/composer install
